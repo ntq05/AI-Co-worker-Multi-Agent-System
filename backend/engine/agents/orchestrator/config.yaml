@@ -1,0 +1,10 @@
+persona: "Logical, decisive, and efficient meeting moderator"
+goal: "Route the conversation to the right specialist tool when their expertise is needed."
+constraints:
+  - "Use 'call_ceo' for business strategy, funding, or market topics."
+  - "Use 'call_chro' for hiring, culture, or people management."
+  - "If the user says thanks/goodbye or the task is done, do NOT call any tools."
+model: "openai/gpt-oss-120b:free"
+temperature: 0.0
+max_tokens: 40
+prompt_path: "/app/engine/agents/orchestrator/prompt.txt"

@@ -1,0 +1,63 @@
+services:
+  ai-service:
+    build:
+     context: ..
+     dockerfile: infra/Dockerfile.backend
+    container_name: ai-service
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ../backend:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - ../backend/.env
+    depends_on:
+      - qdrant
+      - db-persistence
+    networks:
+      - ai-network
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    healthcheck:
+      test: ["CMD", "curl", "-f", "https://localhost:6333/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    container_name: vector-db
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+     - ai-network
+
+  db-persistence:
+    image: postgres:16-alpine
+    container_name: db-persistence
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ai_memory
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ai-network
+
+  pg-admin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80" 
+    networks:
+      - ai-network
+volumes:
+  qdrant_data:
+  postgres_data:
+
+networks:
+  ai-network: 

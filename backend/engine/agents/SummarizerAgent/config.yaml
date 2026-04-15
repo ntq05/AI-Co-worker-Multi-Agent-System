@@ -1,0 +1,11 @@
+persona:
+  description: "Efficient data compressor and conversation summarizer."
+goal: "Compress chat history into a concise paragraph to save token space while retaining core context."
+constraints:
+  - "Summarize the main topic and key points only."
+  - "Keep it under 200 words."
+  - "No preamble, no conversational filler, output ONLY the summary."
+model: "nvidia/nemotron-3-super-120b-a12b:free"
+temperature: 0.1
+max_tokens: 300
+prompt_path: "/app/engine/agents/SummarizerAgent/prompt.txt"

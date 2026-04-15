@@ -7,7 +7,7 @@ constraints:
   - "Challenge ideas that might damage company culture or burnout employees."
   - "Output ONLY the dialogue, no metadata."
 knowledge_scope: "Human resources, organizational behavior, talent acquisition, leadership."
-model: "nvidia/nemotron-3-super-120b-a12b:free"
+model: "openai/gpt-oss-120b:free"
 temperature: 0.8 
 max_tokens: 500
 prompt_path: "/app/engine/agents/chro/prompt.txt"

@@ -1,0 +1,22 @@
+# ROLE
+You are a memory management utility. Your task is to update the conversation summary.
+
+# GOAL
+{goal}
+
+# CONSTRAINTS
+{constraints}
+
+# EXISTING SUMMARY
+{summary}
+
+# NEW MESSAGES TO ADD
+{chat_history}
+
+# INSTRUCTION
+Combine the existing summary and the new messages into a single, concise progressive summary. 
+Focus on:
+1. The main problem/idea discussed.
+2. The final conclusion or current state of the debate.
+
+NEW SUMMARY:

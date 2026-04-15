@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional, Dict, Any
 import yaml
-
+import uuid
 from engine.llm.providers.openRouter import OpenRouterLLM
 
 from langchain_core.messages import AIMessage
@@ -65,7 +65,8 @@ class BaseAgent(ABC):
 
     def to_node(self):
         def node(state: Dict[str, Any]):
-            # 1. Lấy câu hỏi gốc
+            summary = state.get("summary", "")
+
             user_question = ""
             for msg in reversed(state["messages"]):
                 if msg.type == "human":
@@ -73,8 +74,10 @@ class BaseAgent(ABC):
                     break
 
             context_list = []
-            
-            # Duyệt qua các tin nhắn để tái cấu trúc context
+
+            if summary:
+                context_list.append(f"--- PREVIOUS CONTEXT SUMMARY ---\n{summary}\n--- END OF SUMMARY ---")
+
             for msg in state["messages"]:
                 name = getattr(msg, "name", msg.type)
                 if msg.content:
@@ -85,10 +88,18 @@ class BaseAgent(ABC):
             print(f"DEBUG Agent {self.name} processing with context length: {len(context_list)}")
             response = self.respond(user_input=user_question, chat_history=current_context)
 
-            # 4. Trả về kết quả
+            msg_id = str(uuid.uuid4())
+
             if self.name.lower() == "orchestrator":
+                if hasattr(response, "id"):
+                    response.id = msg_id
                 return {"messages": [response], "active_agent": self.name}
             else:
-                new_message = AIMessage(content=str(response), name=self.name)
+                new_message = AIMessage(
+                    content=str(response), 
+                    name=self.name, 
+                    id=msg_id
+                )
                 return {"messages": [new_message], "active_agent": self.name}
         return node
+    

@@ -4,6 +4,7 @@ from engine.agents.ceo.agent import CEOAgent
 from engine.agents.orchestrator.agent import OrchestratorAgent 
 from engine.agents.chro.agent import CHROAgent
 from engine.agents.manager.agent import ManagerAgent
+from engine.agents.SummarizerAgent.agent import SummarizerAgent
 from langchain_core.messages import SystemMessage
 from engine.state import AgentState
 from langchain_core.messages import HumanMessage
@@ -12,7 +13,7 @@ from psycopg_pool import AsyncConnectionPool
 
 DB_URI = "postgresql://user:password@db-persistence:5432/ai_memory?sslmode=disable"
 
-connection_pool = AsyncConnectionPool(conninfo=DB_URI, max_size = 20, kwargs={"autocommit": True})
+connection_pool = AsyncConnectionPool(conninfo=DB_URI, max_size = 20, kwargs={"autocommit": True}, open=False)
 
 class Graph:
     def __init__(self):
@@ -20,6 +21,7 @@ class Graph:
         self.orchestrator = OrchestratorAgent(config_path="engine/agents/orchestrator/config.yaml")
         self.chro = CHROAgent(config_path="engine/agents/chro/config.yaml")
         self.manager = ManagerAgent(config_path = "engine/agents/manager/config.yaml")
+        self.summarizer = SummarizerAgent(config_path = "engine/agents/SummarizerAgent/config.yaml")
 
         self.workflow = None
 
@@ -27,13 +29,23 @@ class Graph:
         if self.workflow:
             return self.workflow
         
+        try:
+            await connection_pool.open()
+            print("[DB] Connection pool opened successfully.")
+        except Exception as e:
+            print(f"[DB] Note on pool opening: {e}")
+
         builder = StateGraph(AgentState)
         builder.add_node("orchestrator", self.orchestrator.to_node())
         builder.add_node("CEO", self.ceo.to_node())
         builder.add_node("CHRO", self.chro.to_node())
         builder.add_node("Manager", self.manager.to_node())
+        builder.add_node("summarizer", self.summarizer.to_node())
 
-        builder.set_entry_point("orchestrator")
+        builder.set_entry_point("summarizer")
+
+        builder.add_edge("summarizer", "orchestrator")
+
         builder.add_conditional_edges(
             "orchestrator",
             self.route_fn,
@@ -51,6 +63,9 @@ class Graph:
         return self.workflow
 
     def route_fn(self, state: AgentState):
+
+        print(f"[DEBUG ROUTE] Total messages in state: {len(state['messages'])}")
+
         last_msg = state["messages"][-1]
         
         # 1. Thử lấy tool_calls theo mọi cách có thể

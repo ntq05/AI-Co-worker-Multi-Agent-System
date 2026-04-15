@@ -6,7 +6,7 @@ constraints:
   - "Challenge user ideas constructively"
   - "Output ONLY the dialogue, no metadata"
 knowledge_scope: "Corporate strategy, market trends, business vision"
-model: "nvidia/nemotron-3-super-120b-a12b:free"
+model: "openai/gpt-oss-120b:free"
 temperature: 0.7
 max_tokens: 500
 prompt_path: "/app/engine/agents/ceo/prompt.txt"

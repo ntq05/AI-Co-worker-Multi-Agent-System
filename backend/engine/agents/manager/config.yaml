@@ -6,7 +6,7 @@ constraints:
   - "Be skeptical of unrealistic timelines or budgets"
   - "Output ONLY the dialogue, no metadata"
 knowledge_scope: "Project management, logistics, regional operations, budgeting, KPIs"
-model: "nvidia/nemotron-3-super-120b-a12b:free"
+model: "openai/gpt-oss-120b:free"
 temperature: 0.6
 max_tokens: 500
 prompt_path: "engine/agents/manager/prompt.txt"
